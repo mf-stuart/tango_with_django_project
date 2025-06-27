@@ -3,6 +3,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tango_with_django_project.setti
 
 import django
 django.setup()
+from django.contrib.auth.models import User
 from rango.models import Category, Page
 
 def populate():
@@ -14,27 +15,35 @@ def populate():
 
     python_pages = [
         {'title': 'Official Python Tutorial',
-         'url': 'http://docs.python.org/3/tutorial/',},
+         'url': 'http://docs.python.org/3/tutorial/',
+         'views': 25},
         {'title': 'How to Think like a Computer Scientist',
-         'url': 'http://www.greenteapress.com/thinkpython/'},
+         'url': 'http://www.greenteapress.com/thinkpython/',
+         'views': 67},
         {'title': 'Learn Python in 10 Minutes',
-         'url': 'http://www.korokithakis.net/tutorials/python/',}
+         'url': 'http://www.korokithakis.net/tutorials/python/',
+         'views': 2}
     ]
 
     django_pages = [
         {'title': 'Official Django Tutorial',
-         'url': 'http://docs.djangoproject.com/en/2.1/intro/tutorial01/'},
+         'url': 'https://docs.djangoproject.com/en/2.1/intro/tutorial01/',
+         'views': 65},
         {'title': 'Django Rocks',
-         'url': 'http://www.djangorocks.com'},
+         'url': 'http://www.djangorocks.com',
+         'views': 17},
         {'title': 'How to Tango with Django',
-         'url': 'http://www.tangowithdjango.com/'}
+         'url': 'http://www.tangowithdjango.com/',
+         'views': 12}
     ]
 
     other_pages = [
         {'title': 'Bottle',
-         'url': 'http://bottlepy.org/doc/dev/',},
+         'url': 'http://bottlepy.org/docs/dev/',
+         'views': 23},
         {'title': 'Flask',
-         'url': 'http://flask.pocoo.org/',}
+         'url': 'http://flask.pocoo.org',
+         'views': 30}
     ]
 
     cats = {'Python': {'views': 128, 'likes': 64,'pages': python_pages,},
@@ -51,29 +60,19 @@ def populate():
     for cat, cat_data in cats.items():
         c = add_cat(cat, cat_data['views'], cat_data['likes'])
         for p in cat_data['pages']:
-            add_page(c, p['title'], p['url'])
+            add_page(c, p['title'], p['url'], p['views'])
 
     # Print out the categories we have added.
     for c in Category.objects.all():
         for p in Page.objects.filter(category=c):
             print(f'- {c}: {p}')
 
-    # # Manually edit some categories
-    # python_cat = Category.objects.get(name='Python')
-    # django_cat = Category.objects.get(name='Django')
-    # other_cat = Category.objects.get(name='Other Frameworks')
-    #
-    # python_cat.views = 128
-    # python_cat.likes = 64
-    # python_cat.save()
-    #
-    # django_cat.views = 64
-    # django_cat.likes = 32
-    # django_cat.save()
-    #
-    # other_cat.views = 32
-    # other_cat.likes = 16
-    # other_cat.save()
+    add_superuser()
+
+def add_superuser():
+    if not User.objects.filter(username='mf-stuart').exists():
+        superuser = User.objects.create_superuser('mf-stuart', 'mf-stuart@outlook.com', 'djangorules')
+        superuser.save()
 
 def add_cat(name, views=0, likes=0):
     cat = Category.objects.get_or_create(
